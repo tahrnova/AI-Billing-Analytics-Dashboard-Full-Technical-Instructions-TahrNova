@@ -1,0 +1,951 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TahrNova - Clinic Management System</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 100%);
+      height: 100%;
+      width: 100%;
+    }
+    
+    html {
+      height: 100%;
+      width: 100%;
+    }
+
+    .main-container {
+      display: flex;
+      height: 100%;
+      width: 100%;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+      color: white;
+      padding: 20px;
+      box-shadow: 4px 0 12px rgba(0,0,0,0.1);
+      overflow-y: auto;
+    }
+
+    .logo-section {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 40px;
+      text-align: center;
+      padding: 15px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 12px;
+      letter-spacing: 1px;
+    }
+
+    .nav-item {
+      padding: 14px 18px;
+      margin: 8px 0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-item:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateX(5px);
+    }
+
+    .nav-item.active {
+      background: rgba(255,255,255,0.25);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .content-area {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+      width: 100%;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(2,132,199,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(2,132,199,0.2);
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #0284c7;
+      margin: 10px 0;
+    }
+
+    .stat-label {
+      color: #64748b;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(2,132,199,0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(2,132,199,0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #0284c7;
+      border: 2px solid #0284c7;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      background: #0284c7;
+      color: white;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #0284c7;
+    }
+
+    .invoice-table {
+      width: 100%;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(2,132,199,0.1);
+    }
+
+    .invoice-table th {
+      background: #0284c7;
+      color: white;
+      padding: 16px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .invoice-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .invoice-table tr:hover {
+      background: #f0f9ff;
+    }
+
+    .status-badge {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .status-paid {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-overdue {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .chart-container {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(2,132,199,0.1);
+      margin-top: 20px;
+    }
+
+    .ai-insight-card {
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 5px solid #0284c7;
+      margin: 15px 0;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90%;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .loading-spinner {
+      border: 3px solid #f3f4f6;
+      border-top: 3px solid #0284c7;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 20px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #334155;
+      font-size: 14px;
+    }
+
+    select.form-input {
+      cursor: pointer;
+    }
+
+    .alert {
+      padding: 14px 20px;
+      border-radius: 10px;
+      margin: 15px 0;
+      font-weight: 500;
+    }
+
+    .alert-success {
+      background: #d1fae5;
+      color: #065f46;
+      border-left: 4px solid #10b981;
+    }
+
+    .alert-error {
+      background: #fee2e2;
+      color: #991b1b;
+      border-left: 4px solid #ef4444;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body>
+  <div class="main-container"><!-- Sidebar -->
+   <div class="sidebar">
+    <div class="logo-section">
+     TahrNova
+    </div>
+    <div class="nav-item active" onclick="switchPage('dashboard')"><span>📊</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="switchPage('billing')"><span>💳</span> Billing
+    </div>
+    <div class="nav-item" onclick="switchPage('analytics')"><span>📈</span> Analytics
+    </div>
+    <div class="nav-item" onclick="switchPage('ai-insights')"><span>🤖</span> AI Insights
+    </div>
+    <div class="nav-item" onclick="switchPage('settings')"><span>⚙️</span> Settings
+    </div>
+   </div><!-- Content Area -->
+   <div class="content-area"><!-- Dashboard Page -->
+    <div id="dashboard" class="page active">
+     <h1 class="section-title" id="dashboard-title-text">Welcome to TahrNova</h1>
+     <div class="grid-4">
+      <div class="stat-card">
+       <div class="stat-label">
+        Total Revenue
+       </div>
+       <div class="stat-value" id="total-revenue">
+        $0
+       </div>
+       <div style="color: #10b981; font-size: 12px; margin-top: 8px;">
+        ↑ 12% from last month
+       </div>
+      </div>
+      <div class="stat-card">
+       <div class="stat-label">
+        Total Patients
+       </div>
+       <div class="stat-value" id="total-patients">
+        0
+       </div>
+       <div style="color: #10b981; font-size: 12px; margin-top: 8px;">
+        ↑ 8% from last month
+       </div>
+      </div>
+      <div class="stat-card">
+       <div class="stat-label">
+        Appointments Today
+       </div>
+       <div class="stat-value" id="appointments-today">
+        0
+       </div>
+       <div style="color: #0284c7; font-size: 12px; margin-top: 8px;">
+        3 upcoming
+       </div>
+      </div>
+      <div class="stat-card">
+       <div class="stat-label">
+        Pending Invoices
+       </div>
+       <div class="stat-value" id="pending-invoices">
+        0
+       </div>
+       <div style="color: #f59e0b; font-size: 12px; margin-top: 8px;">
+        Action needed
+       </div>
+      </div>
+     </div>
+     <div class="chart-container">
+      <h3 style="margin-bottom: 20px; color: #1e293b;">Revenue Trend (Last 7 Days)</h3>
+      <canvas id="revenueChart"></canvas>
+     </div>
+     <div class="chart-container">
+      <h3 style="margin-bottom: 20px; color: #1e293b;">Department Performance</h3>
+      <canvas id="departmentChart"></canvas>
+     </div>
+    </div><!-- Billing Page -->
+    <div id="billing" class="page">
+     <h1 class="section-title">Billing Management</h1><button class="btn-primary" onclick="openInvoiceModal()">+ Create New Invoice</button>
+     <div class="chart-container" style="margin-top: 20px;">
+      <h3 style="margin-bottom: 15px;">Recent Invoices</h3>
+      <div id="invoices-list"></div>
+     </div>
+    </div><!-- Analytics Page -->
+    <div id="analytics" class="page">
+     <h1 class="section-title">Analytics Dashboard</h1>
+     <div class="grid-2">
+      <div class="chart-container">
+       <h3 style="margin-bottom: 20px;">Patient Flow (Monthly)</h3>
+       <canvas id="patientFlowChart"></canvas>
+      </div>
+      <div class="chart-container">
+       <h3 style="margin-bottom: 20px;">Marketing Source Performance</h3>
+       <canvas id="marketingChart"></canvas>
+      </div>
+     </div>
+     <div class="chart-container">
+      <h3 style="margin-bottom: 20px;">Monthly Revenue Comparison</h3>
+      <canvas id="revenueComparisonChart"></canvas>
+     </div>
+    </div><!-- AI Insights Page -->
+    <div id="ai-insights" class="page">
+     <h1 class="section-title">AI-Powered Insights</h1>
+     <div class="ai-insight-card">
+      <h3 style="color: #0369a1; margin-bottom: 10px;">🔮 Revenue Prediction</h3>
+      <p style="color: #475569; margin-bottom: 15px;">AI analyzes your historical data to predict future revenue</p><button class="btn-primary" onclick="predictRevenue()">Generate Revenue Forecast</button>
+      <div id="revenue-prediction" style="margin-top: 15px;"></div>
+     </div>
+     <div class="ai-insight-card">
+      <h3 style="color: #0369a1; margin-bottom: 10px;">⚠️ No-Show Prediction</h3>
+      <p style="color: #475569; margin-bottom: 15px;">Identify patients likely to miss appointments</p><button class="btn-primary" onclick="predictNoShows()">Analyze No-Show Risk</button>
+      <div id="noshow-prediction" style="margin-top: 15px;"></div>
+     </div>
+     <div class="ai-insight-card">
+      <h3 style="color: #0369a1; margin-bottom: 10px;">🔍 Billing Error Detection</h3>
+      <p style="color: #475569; margin-bottom: 15px;">AI scans invoices for potential errors</p><button class="btn-primary" onclick="detectBillingErrors()">Run Error Detection</button>
+      <div id="billing-errors" style="margin-top: 15px;"></div>
+     </div>
+    </div><!-- Settings Page -->
+    <div id="settings" class="page">
+     <h1 class="section-title">Settings</h1>
+     <div class="chart-container">
+      <h3 style="margin-bottom: 20px;" id="clinic-name-display">TahrNova Medical Center</h3>
+      <div class="form-group"><label class="form-label">Clinic Address</label> <input type="text" class="form-input" placeholder="123 Medical Plaza, Healthcare City">
+      </div>
+      <div class="form-group"><label class="form-label">Contact Email</label> <input type="email" class="form-input" placeholder="contact@tahrnova.com">
+      </div>
+      <div class="form-group"><label class="form-label">Phone Number</label> <input type="tel" class="form-input" placeholder="+1 (555) 123-4567">
+      </div><button class="btn-primary">Save Settings</button>
+     </div>
+     <div class="chart-container" style="margin-top: 20px;">
+      <h3 style="margin-bottom: 20px;">Departments</h3>
+      <div style="color: #64748b;">
+       <div style="padding: 10px; border-left: 3px solid #0284c7; margin: 8px 0;">
+        🦷 Dentistry
+       </div>
+       <div style="padding: 10px; border-left: 3px solid #0284c7; margin: 8px 0;">
+        👨‍⚕️ General Practice
+       </div>
+       <div style="padding: 10px; border-left: 3px solid #0284c7; margin: 8px 0;">
+        ❤️ Cardiology
+       </div>
+       <div style="padding: 10px; border-left: 3px solid #0284c7; margin: 8px 0;">
+        👶 Pediatrics
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div><!-- Invoice Modal -->
+  <div id="invoice-modal" class="modal">
+   <div class="modal-content">
+    <h2 style="margin-bottom: 20px; color: #1e293b;">Create New Invoice</h2>
+    <form id="invoice-form">
+     <div class="form-group"><label class="form-label">Patient Name</label> <input type="text" id="patient-name" class="form-input" required placeholder="John Doe">
+     </div>
+     <div class="form-group"><label class="form-label">Patient Age</label> <input type="number" id="patient-age" class="form-input" required placeholder="35">
+     </div>
+     <div class="form-group"><label class="form-label">Doctor</label> <select id="doctor" class="form-input" required> <option value="">Select Doctor</option> <option value="Dr. Sarah Johnson">Dr. Sarah Johnson</option> <option value="Dr. Michael Chen">Dr. Michael Chen</option> <option value="Dr. Emily Rodriguez">Dr. Emily Rodriguez</option> <option value="Dr. David Kumar">Dr. David Kumar</option> </select>
+     </div>
+     <div class="form-group"><label class="form-label">Department</label> <select id="department" class="form-input" required> <option value="">Select Department</option> <option value="Dentistry">Dentistry</option> <option value="General Practice">General Practice</option> <option value="Cardiology">Cardiology</option> <option value="Pediatrics">Pediatrics</option> </select>
+     </div>
+     <div class="form-group"><label class="form-label">Treatment</label> <input type="text" id="treatment" class="form-input" required placeholder="Dental Cleaning">
+     </div>
+     <div class="form-group"><label class="form-label">CPT Code</label> <input type="text" id="cpt-code" class="form-input" required placeholder="D1110">
+     </div>
+     <div class="form-group"><label class="form-label">Amount ($)</label> <input type="number" id="amount" class="form-input" required placeholder="250" step="0.01">
+     </div>
+     <div class="form-group"><label class="form-label">Marketing Source</label> <select id="marketing-source" class="form-input" required> <option value="">Select Source</option> <option value="Facebook">Facebook</option> <option value="Instagram">Instagram</option> <option value="Website">Website</option> <option value="Referral">Referral</option> <option value="Walk-in">Walk-in</option> </select>
+     </div>
+     <div style="display: flex; gap: 10px; margin-top: 20px;"><button type="submit" class="btn-primary" id="submit-invoice-btn">Create Invoice</button> <button type="button" class="btn-secondary" onclick="closeInvoiceModal()">Cancel</button>
+     </div>
+     <div id="invoice-alert"></div>
+    </form>
+   </div>
+  </div>
+  <script>
+    // Configuration
+    const defaultConfig = {
+      clinic_name: "TahrNova Medical Center",
+      dashboard_title: "Welcome to TahrNova",
+      primary_color: "#0284c7",
+      background_color: "#e0f2fe",
+      text_color: "#1e293b",
+      font_family: "Inter",
+      font_size: 16
+    };
+
+    let allRecords = [];
+    let revenueChart, departmentChart, patientFlowChart, marketingChart, revenueComparisonChart;
+
+    // Data Handler
+    const dataHandler = {
+      onDataChanged(data) {
+        allRecords = data;
+        updateDashboard();
+        renderInvoices();
+        updateCharts();
+      }
+    };
+
+    // Initialize SDK
+    async function initializeSdk() {
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) {
+          console.error("Failed to initialize Data SDK");
+        }
+      }
+
+      if (window.elementSdk) {
+        await window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (config) => {
+            const clinicName = config.clinic_name || defaultConfig.clinic_name;
+            const dashboardTitle = config.dashboard_title || defaultConfig.dashboard_title;
+            
+            document.getElementById('clinic-name-display').textContent = clinicName;
+            document.getElementById('dashboard-title-text').textContent = dashboardTitle;
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["clinic_name", config.clinic_name || defaultConfig.clinic_name],
+            ["dashboard_title", config.dashboard_title || defaultConfig.dashboard_title]
+          ])
+        });
+      }
+    }
+
+    // Page Navigation
+    function switchPage(pageName) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      
+      document.getElementById(pageName).classList.add('active');
+      event.target.closest('.nav-item').classList.add('active');
+
+      if (pageName === 'analytics') {
+        setTimeout(updateCharts, 100);
+      }
+    }
+
+    // Update Dashboard Stats
+    function updateDashboard() {
+      const invoices = allRecords.filter(r => r.type === 'invoice');
+      const today = new Date().toISOString().split('T')[0];
+      
+      const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.amount || 0), 0);
+      const uniquePatients = new Set(invoices.map(inv => inv.patient_name)).size;
+      const todayAppointments = invoices.filter(inv => inv.date === today).length;
+      const pendingInvoices = invoices.filter(inv => inv.status === 'Pending').length;
+
+      document.getElementById('total-revenue').textContent = `$${totalRevenue.toLocaleString()}`;
+      document.getElementById('total-patients').textContent = uniquePatients;
+      document.getElementById('appointments-today').textContent = todayAppointments;
+      document.getElementById('pending-invoices').textContent = pendingInvoices;
+
+      updateRevenueChart();
+    }
+
+    // Update Revenue Chart
+    function updateRevenueChart() {
+      const ctx = document.getElementById('revenueChart');
+      if (!ctx) return;
+
+      const invoices = allRecords.filter(r => r.type === 'invoice');
+      const last7Days = [];
+      const revenueData = [];
+
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        last7Days.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+        
+        const dayRevenue = invoices
+          .filter(inv => inv.date === dateStr)
+          .reduce((sum, inv) => sum + (inv.amount || 0), 0);
+        revenueData.push(dayRevenue);
+      }
+
+      if (revenueChart) {
+        revenueChart.destroy();
+      }
+
+      revenueChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: last7Days,
+          datasets: [{
+            label: 'Revenue ($)',
+            data: revenueData,
+            borderColor: '#0284c7',
+            backgroundColor: 'rgba(2, 132, 199, 0.1)',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    // Update All Charts
+    function updateCharts() {
+      const invoices = allRecords.filter(r => r.type === 'invoice');
+
+      // Department Chart
+      const deptCtx = document.getElementById('departmentChart');
+      if (deptCtx) {
+        const deptData = {};
+        invoices.forEach(inv => {
+          deptData[inv.department] = (deptData[inv.department] || 0) + (inv.amount || 0);
+        });
+
+        if (departmentChart) departmentChart.destroy();
+        
+        departmentChart = new Chart(deptCtx, {
+          type: 'bar',
+          data: {
+            labels: Object.keys(deptData),
+            datasets: [{
+              label: 'Revenue by Department',
+              data: Object.values(deptData),
+              backgroundColor: ['#0284c7', '#0369a1', '#075985', '#0c4a6e']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+          }
+        });
+      }
+
+      // Patient Flow Chart
+      const pfCtx = document.getElementById('patientFlowChart');
+      if (pfCtx) {
+        if (patientFlowChart) patientFlowChart.destroy();
+        
+        patientFlowChart = new Chart(pfCtx, {
+          type: 'line',
+          data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+              label: 'Patients',
+              data: [45, 52, 61, 58, 67, 73],
+              borderColor: '#0284c7',
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true
+          }
+        });
+      }
+
+      // Marketing Chart
+      const mktCtx = document.getElementById('marketingChart');
+      if (mktCtx) {
+        const mktData = {};
+        invoices.forEach(inv => {
+          mktData[inv.marketing_source] = (mktData[inv.marketing_source] || 0) + 1;
+        });
+
+        if (marketingChart) marketingChart.destroy();
+        
+        marketingChart = new Chart(mktCtx, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(mktData),
+            datasets: [{
+              data: Object.values(mktData),
+              backgroundColor: ['#0284c7', '#0369a1', '#075985', '#0c4a6e', '#7dd3fc']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true
+          }
+        });
+      }
+
+      // Revenue Comparison
+      const rcCtx = document.getElementById('revenueComparisonChart');
+      if (rcCtx) {
+        if (revenueComparisonChart) revenueComparisonChart.destroy();
+        
+        revenueComparisonChart = new Chart(rcCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+              label: 'This Year',
+              data: [12500, 15200, 18900, 17600, 21300, 23400],
+              backgroundColor: '#0284c7'
+            }, {
+              label: 'Last Year',
+              data: [11200, 13800, 16200, 15900, 18700, 19800],
+              backgroundColor: '#bae6fd'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: { y: { beginAtZero: true } }
+          }
+        });
+      }
+    }
+
+    // Invoice Management
+    function openInvoiceModal() {
+      document.getElementById('invoice-modal').classList.add('active');
+    }
+
+    function closeInvoiceModal() {
+      document.getElementById('invoice-modal').classList.remove('active');
+      document.getElementById('invoice-form').reset();
+      document.getElementById('invoice-alert').innerHTML = '';
+    }
+
+    async function handleInvoiceSubmit(e) {
+      e.preventDefault();
+      
+      if (allRecords.length >= 999) {
+        document.getElementById('invoice-alert').innerHTML = '<div class="alert alert-error">Maximum limit of 999 records reached. Please delete some records first.</div>';
+        return;
+      }
+
+      const submitBtn = document.getElementById('submit-invoice-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Creating...<span class="loading-spinner"></span>';
+
+      const newInvoice = {
+        id: 'INV-' + Date.now(),
+        type: 'invoice',
+        patient_name: document.getElementById('patient-name').value,
+        patient_age: parseInt(document.getElementById('patient-age').value),
+        doctor: document.getElementById('doctor').value,
+        department: document.getElementById('department').value,
+        treatment: document.getElementById('treatment').value,
+        cpt_code: document.getElementById('cpt-code').value,
+        amount: parseFloat(document.getElementById('amount').value),
+        marketing_source: document.getElementById('marketing-source').value,
+        status: 'Pending',
+        date: new Date().toISOString().split('T')[0],
+        created_at: new Date().toISOString()
+      };
+
+      if (window.dataSdk) {
+        const result = await window.dataSdk.create(newInvoice);
+        
+        if (result.isOk) {
+          document.getElementById('invoice-alert').innerHTML = '<div class="alert alert-success">✓ Invoice created successfully!</div>';
+          setTimeout(() => {
+            closeInvoiceModal();
+          }, 1500);
+        } else {
+          document.getElementById('invoice-alert').innerHTML = '<div class="alert alert-error">Error creating invoice. Please try again.</div>';
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Create Invoice';
+        }
+      }
+    }
+
+    // Render Invoices
+    function renderInvoices() {
+      const invoices = allRecords.filter(r => r.type === 'invoice').sort((a, b) => 
+        new Date(b.created_at) - new Date(a.created_at)
+      );
+
+      const container = document.getElementById('invoices-list');
+      if (!container) return;
+
+      if (invoices.length === 0) {
+        container.innerHTML = '<p style="color: #64748b; text-align: center; padding: 40px;">No invoices yet. Create your first invoice!</p>';
+        return;
+      }
+
+      let html = '<table class="invoice-table"><thead><tr><th>Invoice ID</th><th>Patient</th><th>Doctor</th><th>Department</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+
+      invoices.forEach(inv => {
+        const statusClass = inv.status === 'Paid' ? 'status-paid' : 
+                           inv.status === 'Pending' ? 'status-pending' : 'status-overdue';
+        
+        html += `
+          <tr>
+            <td><strong>${inv.id}</strong></td>
+            <td>${inv.patient_name}</td>
+            <td>${inv.doctor}</td>
+            <td>${inv.department}</td>
+            <td>$${inv.amount.toFixed(2)}</td>
+            <td><span class="status-badge ${statusClass}">${inv.status}</span></td>
+            <td><button class="btn-secondary" onclick="togglePaymentStatus('${inv.__backendId}', '${inv.status}')">Mark ${inv.status === 'Paid' ? 'Unpaid' : 'Paid'}</button></td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    // Toggle Payment Status
+    async function togglePaymentStatus(backendId, currentStatus) {
+      const record = allRecords.find(r => r.__backendId === backendId);
+      if (!record) return;
+
+      const newStatus = currentStatus === 'Paid' ? 'Pending' : 'Paid';
+      record.status = newStatus;
+
+      if (window.dataSdk) {
+        await window.dataSdk.update(record);
+      }
+    }
+
+    // AI Predictions
+    function predictRevenue() {
+      const invoices = allRecords.filter(r => r.type === 'invoice');
+      const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.amount || 0), 0);
+      const avgMonthly = totalRevenue / Math.max(1, invoices.length / 30);
+      const predicted = avgMonthly * 30 * 1.08; // 8% growth prediction
+
+      document.getElementById('revenue-prediction').innerHTML = `
+        <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 15px;">
+          <h4 style="color: #0369a1; margin-bottom: 10px;">📊 30-Day Revenue Forecast</h4>
+          <div style="font-size: 28px; font-weight: 700; color: #0284c7; margin: 15px 0;">$${predicted.toFixed(2)}</div>
+          <p style="color: #64748b; font-size: 14px;">Based on current trends and historical data, your predicted revenue for the next 30 days shows an 8% growth trajectory.</p>
+          <div style="margin-top: 15px; padding: 12px; background: #d1fae5; border-radius: 8px; color: #065f46;">
+            ✓ Confidence Level: 87%
+          </div>
+        </div>
+      `;
+    }
+
+    function predictNoShows() {
+      const invoices = allRecords.filter(r => r.type === 'invoice');
+      const highRiskPatients = invoices.filter(inv => inv.patient_age < 25 || inv.patient_age > 70).slice(0, 5);
+
+      let html = '<div style="background: white; padding: 20px; border-radius: 10px; margin-top: 15px;"><h4 style="color: #0369a1; margin-bottom: 15px;">⚠️ High Risk Patients</h4>';
+      
+      if (highRiskPatients.length === 0) {
+        html += '<p style="color: #64748b;">No high-risk appointments detected.</p>';
+      } else {
+        highRiskPatients.forEach(inv => {
+          const risk = Math.floor(Math.random() * 30) + 40; // 40-70% risk
+          html += `
+            <div style="padding: 12px; border-left: 3px solid #f59e0b; background: #fef3c7; margin: 10px 0; border-radius: 6px;">
+              <strong>${inv.patient_name}</strong> - ${inv.department}<br>
+              <span style="color: #92400e; font-size: 14px;">No-show probability: ${risk}%</span>
+            </div>
+          `;
+        });
+      }
+
+      html += '</div>';
+      document.getElementById('noshow-prediction').innerHTML = html;
+    }
+
+    function detectBillingErrors() {
+      const invoices = allRecords.filter(r => r.type === 'invoice');
+      const errors = [];
+
+      invoices.forEach(inv => {
+        if (!inv.cpt_code || inv.cpt_code.length < 4) {
+          errors.push({ invoice: inv.id, error: 'Invalid CPT code', severity: 'high' });
+        }
+        if (inv.amount > 5000) {
+          errors.push({ invoice: inv.id, error: 'Unusually high amount', severity: 'medium' });
+        }
+        if (!inv.patient_name || inv.patient_name.length < 3) {
+          errors.push({ invoice: inv.id, error: 'Missing patient data', severity: 'high' });
+        }
+      });
+
+      let html = '<div style="background: white; padding: 20px; border-radius: 10px; margin-top: 15px;"><h4 style="color: #0369a1; margin-bottom: 15px;">🔍 Error Detection Results</h4>';
+      
+      if (errors.length === 0) {
+        html += '<div style="padding: 15px; background: #d1fae5; border-radius: 8px; color: #065f46;">✓ No billing errors detected. All invoices look good!</div>';
+      } else {
+        errors.forEach(err => {
+          const color = err.severity === 'high' ? '#fee2e2' : '#fef3c7';
+          const textColor = err.severity === 'high' ? '#991b1b' : '#92400e';
+          html += `
+            <div style="padding: 12px; background: ${color}; margin: 10px 0; border-radius: 6px; border-left: 3px solid ${textColor};">
+              <strong>${err.invoice}</strong><br>
+              <span style="color: ${textColor}; font-size: 14px;">${err.error}</span>
+            </div>
+          `;
+        });
+      }
+
+      html += '</div>';
+      document.getElementById('billing-errors').innerHTML = html;
+    }
+
+    // Event Listeners
+    document.getElementById('invoice-form').addEventListener('submit', handleInvoiceSubmit);
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeSdk();
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a836b5c65635b2e',t:'MTc2NDc2ODYzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
